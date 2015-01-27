@@ -1,0 +1,35 @@
+ProductType ENUM {
+      toothpaste,ketchup,shampoo,laundrydetergent,peanutbutter,
+      clingwrap,toiletpaper,plasticcutlery,paperplates,
+      plasticcups,ziplocbag,trashbags,papertowels,macncheese,jam
+}
+
+VolumetricType ENUM {floz,oz,gram,unit,sqft,unknown}
+
+AvailabilityEnum ENUM {"available","unavailable","unknown"}
+
+VendorNameEnum ENUM {"walmart", "amazon"}
+
+VendorProduct {
+  ***VendorName VendorNameEnum
+  *VendorProductId string
+  **UPC string
+  Count int
+}
+
+VendorOffer {
+  *VendorProductId string
+  Price int [int not float. $3.34 = 334]
+  **Date int [num milliseconds since jan 1 1970 epoch]
+  Availability AvailabiltyEnum
+  HasCoupon BooleanEnum
+  Msrp int
+}
+
+Product {
+  **Name string
+  *UPC string
+  ***ProductType ProductType
+  VolumetricType VolumetricType
+  VolumetricAmount double
+}

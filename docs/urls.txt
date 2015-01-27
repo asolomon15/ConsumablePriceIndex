@@ -1,0 +1,37 @@
+this file shows the urls that we need to sign to make specific requests. go to the below url to sign this
+
+http://associates-amazon.s3.amazonaws.com/signed-requests/helper/index.html
+
+#get the price
+http://ecs.amazonaws.com/onca/xml?Service=AWSECommerceService
+&Version=2011-08-01
+&AssociateTag=dogfoodconnoi-20
+&Operation=ItemLookup
+&ItemId=B000WHXN3C
+&ResponseGroup=OfferFull,PromotionSummary
+&SignatureVersion=2
+&SignatureMethod=HmacSHA256
+
+Offers->TotalOffers
+Offers->Offer->OfferListing->Price
+Offers->Offer->Promotions->Promotion->Summary->PromotionId
+Offers->Offer->Promotions->Promotion->Summary->Category
+Offers->Offer->Promotions->Promotion->Summary->EligibilityRequirementDescription
+Offers->Offer->Promotions->Promotion->Summary->BenefitDescription
+#think might want to get the min/max/avg of offer prices
+
+
+#get the title and description
+http://ecs.amazonaws.com/onca/xml?Service=AWSECommerceService
+&Version=2011-08-01
+&AssociateTag=dogfoodconnoi-20
+&Operation=ItemLookup
+&ItemId=B000WHXN3C
+&ResponseGroup=ItemAttributes
+&SignatureVersion=2
+&SignatureMethod=HmacSHA256
+
+ItemAttributes->UPC
+ItemAttributes->Title
+ItemAttributes->ListPrice->Amount
+
