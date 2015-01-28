@@ -59,7 +59,7 @@ func GetVendorProduct( vendorProductId string)(chan *VendorProduct) {
               *ddb.NewEqualStringAttributeComparison("VendorProductId", vendorProductId),
         }
 
-    msaa,err := productTable.Scan( acs)
+    msaa,err := productTable.Query( acs)
     if err == nil {
       if len(msaa) > 0 {
         prod.VendorProductId = vendorProductId

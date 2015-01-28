@@ -96,7 +96,7 @@ func GetInstanceConfig( id int64)(chan string) {
         *ddb.NewEqualInt64AttributeComparison("Id", id),
     }
 
-    msaa,err := configTable.Scan( acs)
+    msaa,err := configTable.Query( acs)
     if err == nil {
       if len(msaa) > 0 {
         for k,v := range msaa[0] {
@@ -158,7 +158,7 @@ func GetVendorOffer( vendorProductId string)(chan *VendorOffer) {
               *ddb.NewEqualStringAttributeComparison("VendorProductId", vendorProductId),
         }
 
-    msaa,err := voTable.Scan( acs)
+    msaa,err := voTable.Query( acs)
     if err == nil {
       if len(msaa) > 0 {
         vo.VendorProductId = vendorProductId
@@ -228,7 +228,7 @@ func GetProduct( UPC string)(chan *Product) {
               *ddb.NewEqualStringAttributeComparison("UPC", UPC),
     }
 
-    msaa,err := productTable.Scan( acs)
+    msaa,err := productTable.Query( acs)
     if err == nil {
       if len(msaa) > 0 {
         prod.UPC = UPC
