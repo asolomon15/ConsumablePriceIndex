@@ -7,6 +7,8 @@ import (
   "errors"
 )
 
+type VendorNameEnum string //"amazon", "walmart"
+
 type VendorProduct struct {
   VendorName VendorNameEnum
   VendorProductId string

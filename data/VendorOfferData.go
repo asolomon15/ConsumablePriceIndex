@@ -5,6 +5,8 @@ import (
   "strconv"
 )
 
+type AvailabilityEnum string //"available","unavailable","unknown"
+
 type VendorOffer struct {
   VendorProductId string
   Price int
