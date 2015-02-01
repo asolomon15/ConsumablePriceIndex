@@ -51,7 +51,33 @@ func PutVendorOffer( vendorOffer VendorOffer)(chan bool) {
   return ret
 }
 
-func GetVendorOffer( vendorProductId string)(chan *VendorOffer) {
+func GetVendorOfferCount( vendorProductId string)(chan int64) {
+  ret := make(chan int64)
+
+  go func() {
+    var count int64
+
+    voTable := getDynamoVendorOfferTable()
+
+    acs := []ddb.AttributeComparison {
+              *ddb.NewEqualStringAttributeComparison("VendorProductId", vendorProductId),
+    }
+
+    count, err := voTable.CountQuery( acs)
+    if err != nil {
+      LOGGER.Printf("unable to get count of '%s' in VendorOffer: %s\n", vendorProductId, err.Error())
+    }
+
+    ret <- count
+
+    close(ret)
+
+  }()
+
+  return ret
+}
+
+func GetLastVendorOffer( vendorProductId string)(chan *VendorOffer) {
   ret := make(chan *VendorOffer)
 
   go func() {
@@ -63,7 +89,12 @@ func GetVendorOffer( vendorProductId string)(chan *VendorOffer) {
               *ddb.NewEqualStringAttributeComparison("VendorProductId", vendorProductId),
         }
 
-    msaa,err := voTable.Query( acs)
+    q := ddb.NewQuery( voTable)
+    q.AddKeyConditions( acs)
+    q.AddLimit(1)
+    q.AddScanIndexForward( false)
+    
+    msaa,_,err := voTable.QueryTable( q)
     if err == nil {
       if len(msaa) > 0 {
         vo.VendorProductId = vendorProductId
@@ -95,4 +126,3 @@ func GetVendorOffer( vendorProductId string)(chan *VendorOffer) {
 
   return ret
 }
-

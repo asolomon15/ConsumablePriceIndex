@@ -15,6 +15,7 @@ VendorProduct {
   *VendorProductId string
   **UPC string
   Count int
+  ***LastRetrieveDate int64
 }
 
 VendorOffer {

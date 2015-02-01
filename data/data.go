@@ -5,6 +5,7 @@ import (
   "github.com/crowdmob/goamz/aws"
   "log"
   "os"
+  "time"
 )
 
 var LOGGER *log.Logger
@@ -71,4 +72,8 @@ func GetInstanceConfig( id int64)(chan string) {
   }()
 
   return ret
+}
+
+func GetCurrentTime()(int64) {
+  return time.Now().UnixNano()/int64(1000000000)
 }

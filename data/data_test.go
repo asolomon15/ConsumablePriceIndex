@@ -5,7 +5,6 @@ import (
   "gopkg.in/check.v1"
   ddb "github.com/crowdmob/goamz/dynamodb"
   "testing"
-  "time"
 )
 
 func Test(t *testing.T) { check.TestingT(t) }
@@ -156,11 +155,11 @@ func createTestProduct(upc string)(*Product) {
   return &prod
 }
 
-func createTestVendorOffer( vendorProductId string)(*VendorOffer) {
+func createTestVendorOffer( vendorProductId string, date int64, price int)(*VendorOffer) {
   vendorOffer := VendorOffer {
     VendorProductId: vendorProductId,
-    Date: time.Now().UnixNano() / int64(1000000000),
-    Price: 1234,
+    Date: date,//time.Now().UnixNano() / int64(1000000000),
+    Price: price,
     Availability: "available",
     HasCoupon: false,
     Msrp: 2345,
@@ -228,11 +227,29 @@ func (s *DataSuite) TestGetVendorProduct( c *check.C) {
   }
 }
 
-func (s *DataSuite) TestGetVendorOffer( c *check.C) {
+func (s *DataSuite) TestGetLastVendorOffer( c *check.C) {
+  //setup
   const vendorProductId = "12345"
-  vendorOffer := createTestVendorOffer( vendorProductId)
+  vendorOfferLast := createTestVendorOffer( vendorProductId, 2, 1234)
+  createTestVendorOffer( vendorProductId , 1, 4321)
 
-  vendorOfferTest := <- GetVendorOffer( vendorProductId)
+  //test
+  vendorOfferTest := <- GetLastVendorOffer( vendorProductId)
+  c.Assert( *vendorOfferLast, check.DeepEquals, *vendorOfferTest)
 
-  c.Assert( *vendorOffer, check.DeepEquals, *vendorOfferTest)
+  //teardown
+}
+
+func (s *DataSuite) TestGetVendorOfferCount( c *check.C) {
+  //setup
+  const vendorProductId = "54321"
+  createTestVendorOffer( vendorProductId, 2, 1234)
+  createTestVendorOffer( vendorProductId , 1, 4321)
+  createTestVendorOffer( vendorProductId , 3, 3214)
+
+  //test
+  count := <- GetVendorOfferCount( vendorProductId)
+  c.Assert( count, check.Equals, int64(3))
+
+  //teardown
 }
