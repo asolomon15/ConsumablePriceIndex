@@ -21,14 +21,10 @@ func stringMapToVendorOffer( elemMaps map[string]string)(*data.VendorOffer) {
   ret.VendorProductId = elemMaps["/itemsResponse/items/item/itemId"]
   f,_ := strconv.ParseFloat( elemMaps["/itemsResponse/items/item/salePrice"], 64)
   ret.Price = int(f*100)
-  ret.Date = time.Now().UnixNano() / int64(1000000000)
- 
+  ret.Date = data.GetCurrentTime(0)
   ret.Availability = "unavailable"
-
   ret.HasCoupon = false
-
   ret.Msrp = 0
-
   return &ret
 }
 

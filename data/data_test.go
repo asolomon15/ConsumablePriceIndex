@@ -122,12 +122,13 @@ func (s *DataSuite) SetUpSuite( c *check.C) {
   }
 }
 
-func createTestVendorProduct( vendorProductId, upc, vendorName string)(*VendorProduct) {
+func createTestVendorProduct( vendorProductId, upc, vendorName string, rd int64)(*VendorProduct) {
   vendorProd := VendorProduct {
     VendorProductId: vendorProductId,
     UPC: upc,
     VendorName: VendorNameEnum(vendorName),
     Count: 1,
+    LastRetrieveDate: rd,
   }
 
   b := <- PutVendorProduct( vendorProd)
@@ -180,16 +181,23 @@ func (s *DataSuite) TestGetVendorProductList( c *check.C) {
   for i:=0; i<10; i++ {
     vendorProducts = append( vendorProducts, fmt.Sprintf("%s-%d", prodidprefix, i))
     createTestVendorProduct( fmt.Sprintf("%s-%d", prodidprefix, i), 
-                          fmt.Sprintf("%d-%s", i, prodidprefix), "walmart")
+                          fmt.Sprintf("%d-%s", i, prodidprefix), 
+                          "walmart",
+                          int64(i))
   }
 
   //run test(s)
-  vpm := <- GetVendorProductList()
+  //all items in setup have a LastRetrieveDate under 10 
+  //so this should return all of them
+  vpm := <- GetVendorProductList( 10)
   c.Assert( len(vpm), check.Equals, len(vendorProducts))
   for _,k := range vendorProducts {
     _,ok := vpm[k]
     c.Assert( ok, check.Equals, true)
   }
+  //only 5 of the test items have a LastRetrieveDate of 4 or less
+  vpm = <- GetVendorProductList( 4)
+  c.Assert( len(vpm), check.Equals, 5)
 
   //cleanup
   for _,v := range vpm {
@@ -214,7 +222,7 @@ func (s *DataSuite) TestGetVendorProduct( c *check.C) {
   const vendorProductId = "12345"
   const upc = "54321"
   const vendorName = "walmart"
-  vendorProduct := createTestVendorProduct( vendorProductId, upc, vendorName)
+  vendorProduct := createTestVendorProduct( vendorProductId, upc, vendorName, 0)
 
   //run test(s)
   vendorProductTest := <- GetVendorProduct( vendorProductId)

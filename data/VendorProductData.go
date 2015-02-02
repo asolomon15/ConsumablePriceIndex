@@ -14,6 +14,7 @@ type VendorProduct struct {
   VendorProductId string
   UPC string
   Count int
+  LastRetrieveDate int64
 }
 
 func getDynamoVendorProductTable()(*ddb.Table) {
@@ -33,7 +34,8 @@ func PutVendorProduct( vendorProd VendorProduct)(chan bool) {
       *ddb.NewStringAttribute("UPC", vendorProd.UPC),
       *ddb.NewStringAttribute("VendorName", string(vendorProd.VendorName)),
       *ddb.NewStringAttribute("VendorProductId", vendorProd.VendorProductId),
-      *ddb.NewStringAttribute("Count", strconv.Itoa(vendorProd.Count)),
+      *ddb.NewNumericAttribute("Count", strconv.Itoa(vendorProd.Count)),
+      *ddb.NewNumericAttribute("LastRetrieveDate", strconv.FormatInt( vendorProd.LastRetrieveDate, 10)),
     }
 
     vendorProductTable := getDynamoVendorProductTable()
@@ -115,13 +117,15 @@ func DeleteVendorProduct( vpid string, vendorName string)(chan error) {
   return ret
 }
 
-func GetVendorProductList()(chan map[string]VendorProduct) {
+func GetVendorProductList( afterDate int64)(chan map[string]VendorProduct) {
   ret := make(chan map[string]VendorProduct)
 
   go func() {
     vpm := make(map[string]VendorProduct)
     vpTable := getDynamoVendorProductTable()
-    acs := []ddb.AttributeComparison { }
+    acs := []ddb.AttributeComparison {
+      *ddb.NewNumericAttributeComparison( "LastRetrieveDate", ddb.COMPARISON_LESS_THAN_OR_EQUAL, afterDate),
+    }
 
     msaa,err := vpTable.Scan( acs)
     if err == nil {

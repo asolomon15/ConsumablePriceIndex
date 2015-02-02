@@ -74,6 +74,6 @@ func GetInstanceConfig( id int64)(chan string) {
   return ret
 }
 
-func GetCurrentTime()(int64) {
-  return time.Now().UnixNano()/int64(1000000000)
+func GetCurrentTime(offset int64)(int64) {
+  return (time.Now().UnixNano()/int64(1000000000))-offset
 }

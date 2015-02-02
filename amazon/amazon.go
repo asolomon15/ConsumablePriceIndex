@@ -20,7 +20,7 @@ func stringMapToVendorOffer( elemMaps map[string]string)(*data.VendorOffer) {
 
   ret.VendorProductId = elemMaps["/ItemLookupResponse/Items/Item/ASIN"]
   ret.Price,_ = strconv.Atoi( elemMaps["/ItemLookupResponse/Items/Item/Offers/Offer/OfferListing/Price/Amount"])
-  ret.Date = time.Now().UnixNano() / int64(1000000000)
+  ret.Date = data.GetCurrentTime(0)
 
   if elemMaps["/ItemLookupResponse/Items/Item/Offers/AvailabilityAttributes/AvailabilityType"] == "now" {
     ret.Availability = "available"
