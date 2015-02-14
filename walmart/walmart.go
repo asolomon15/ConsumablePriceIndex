@@ -6,7 +6,7 @@ import (
   "github.com/bkirkby/ConsumablePriceIndex/xmlretrieval"
   "github.com/bkirkby/ConsumablePriceIndex/data"
   "errors"
-  "time"
+//  "time"
   "strconv"
   "fmt"
 )

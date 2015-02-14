@@ -10,39 +10,58 @@ import (
   "github.com/bkirkby/ConsumablePriceIndex/walmart"
 )
 
-func spawnProdOffers() {
+func processVendorOffers( voChan chan data.VendorOffer) {
+  for {
+    vo := <- voChan
+    b := <- data.PutVendorOffer(vo)
+    if !b {
+      fmt.Printf("unable to save VendorOffer to database: %#v\n", vo)
+    }
+  }
+}
+
+func spawnProdOffers(voChan chan data.VendorOffer) {
   const dayOffset = 86400
-  vpList := data.GetVendorProductList( data.GetCurrentTime(dayOffset))
+  vpList := <- data.GetVendorProductList( data.GetCurrentTime(dayOffset))
+
+  fmt.Printf("checking VendorOffers\n")
 
   for k,v := range vpList {
     go func() {
-      var vendorService ddb.VendorService
+      var vendorService cpi.VendorService
       if v.VendorName == data.VendorNameEnum("walmart") {
-        vendorService = walmart.WalmartService{}
+        vendorService = new(walmart.WalmartService)
       } else if v.VendorName == data.VendorNameEnum("amazon") {
-        vendorService = amazon.AmazonService{}
+        vendorService = new(amazon.AmazonService)
       }
       
       vor := <- vendorService.RetrieveVendorOffer( k)
       if vor.Error != nil {
         fmt.Printf("error getting vendor(%s) offer for '%s': %s\n", v.VendorName, k, vor.Error.Error())
       } else {
-        b := <- data.PutVendorOffer(vor.Data)
+        voChan <- *vor.Data
       }
     }()
   }
+}
+
+func DoVendorOffers() {
+  voChan := make( chan data.VendorOffer)
+
+  spawnProdOffers( voChan)
+  processVendorOffers( voChan)
 }
 
 func main() {
 
   fmt.Printf("OfferServer v0.01\n")
   c := cron.New()
-  c.AddFunc("*/10 * * * * *", func(){ fmt.Printf("hi!\n")})
+  c.AddFunc("*/10 * * * * *", DoVendorOffers)
 
   c.Start()
   fmt.Printf("crontab started\n")
 
-  for i:=0; i<50; i++ {
+  for {
     time.Sleep( time.Second)
   }
   c.Stop()
